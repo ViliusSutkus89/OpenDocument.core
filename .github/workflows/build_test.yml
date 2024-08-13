@@ -180,9 +180,10 @@ jobs:
           name: dotconan2-${{ matrix.os }}-${{ matrix.compiler }}
           path: ~/.conan2
 
-      - run: ls -lh ${{ needs.build.outputs.package_folder}/bin/
+      - run: ls -lh ${{ needs.build.outputs.package_folder }}/bin/
       - name: fix artifact permissions
         run: chmod +x ${{ needs.build.outputs.package_folder }}/bin/*
+      - run: ls -lh ${{ needs.build.outputs.package_folder }}/bin/
 
       - name: test
         if: runner.os != 'Windows'

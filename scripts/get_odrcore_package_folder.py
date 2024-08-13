@@ -22,7 +22,7 @@ def main():
                 gh_output = os.environ.get('GITHUB_OUTPUT')
                 if gh_output:
                     with open(gh_output, 'w') as out:
-                        print(f"package_folder={package_folder}")
+                        print(f"package_folder={package_folder}", file=out)
 
                 sys.exit(0)
     sys.exit(1)

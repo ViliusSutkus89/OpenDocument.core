@@ -186,11 +186,12 @@ jobs:
           name: package-${{ matrix.os }}-${{ matrix.compiler }}
           path: package
 
-      - run: ls -lhR ~/.conan2/p
-      - run: ls -lhR package
       - name: fix artifact permissions
         run: chmod +x package/bin/*
-      - run: ls -lhR package/bin
+
+      - name: set ODR_TEST_DATA_DIRECTORY
+        run: echo ODR_TEST_DATA_DIRECTORY=$(readlink --canonicalize test/data) >> $GITHUB_ENV
+      - run: ls $ODR_TEST_DATA_DIRECTORY
 
       - name: test
         if: runner.os != 'Windows'

@@ -1,7 +1,14 @@
 #include <test_util.hpp>
+#include <cstdlib>
 
 namespace odr::test {
 
-std::string TestData::data_directory() { return "${ODR_TEST_DATA_DIRECTORY}"; }
+std::string TestData::data_directory() {
+  const char * test_data_dir = getenv("ODR_TEST_DATA_DIRECTORY");
+  if (nullptr != test_data_dir)
+    return std::string(test_data_dir);
+  else
+    return "${ODR_TEST_DATA_DIRECTORY}";
+}
 
 } // namespace odr::test

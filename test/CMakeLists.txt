@@ -63,3 +63,9 @@ target_link_libraries(odr_test
         odr
 )
 gtest_add_tests(TARGET odr_test)
+
+install(
+        TARGETS odr_test
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+        BUNDLE DESTINATION ${CMAKE_INSTALL_BINDIR}
+)

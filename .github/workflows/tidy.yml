@@ -1,10 +1,6 @@
 name: tidy
 
-on:
-  push:
-    branches:
-      - main
-  pull_request:
+on: push
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
@@ -17,7 +13,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { os: ubuntu-24.04, compiler: clang-16 }
+          - { os: ubuntu-24.04, compiler: clang-18 }
     steps:
       - name: checkout
         uses: actions/checkout@v4
@@ -35,15 +31,19 @@ jobs:
         run: conan remote add odr https://artifactory.opendocument.app/artifactory/api/conan/conan
       - name: conan config
         run: conan config install .github/config/${{ matrix.os }}-${{ matrix.compiler }}/conan
+
       - name: conan install
-        run: conan install . --output-folder=build --build=missing
+        run: conan install . --version=0.0.0 --options "&:ODR_CLANG_TIDY=True" --build=never --output-folder=build
 
-      - name: cmake
-        run: >
-          cmake -S . -B build
-          -DCMAKE_TOOLCHAIN_FILE="conan_toolchain.cmake"
-          -DCMAKE_BUILD_TYPE=Release
-          -DODR_CLANG_TIDY=ON
+      - name: cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.ccache
+            /Users/runner/Library/Caches/ccache
+          key: ${{ matrix.os }}-${{ matrix.compiler }}-${{ env.CCACHE_KEY_SUFFIX }}
+          restore-keys: |
+            ${{ matrix.os }}-${{ matrix.compiler }}-
 
-      - name: clang-tidy
-        run: cmake --build build
+      - name: conan create
+        run: conan create . --version=0.0.0 --options "&:ODR_CLANG_TIDY=True"

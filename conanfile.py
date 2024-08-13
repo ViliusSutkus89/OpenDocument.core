@@ -19,10 +19,14 @@ class OpenDocumentCoreConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "ODR_TEST": [True, False],
+        "ODR_CLANG_TIDY": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "ODR_TEST": False,
+        "ODR_CLANG_TIDY": False,
     }
 
     def requirements(self):
@@ -35,13 +39,14 @@ class OpenDocumentCoreConan(ConanFile):
         self.requires("utfcpp/4.0.4")
 
     def build_requirements(self):
-        self.test_requires("gtest/1.14.0")
+        if self.options.ODR_TEST:
+            self.test_requires("gtest/1.14.0")
 
     def validate_build(self):
         if self.settings.get_safe("compiler.cppstd"):
             check_min_cppstd(self, 20)
 
-    exports_sources = ["cli/*", "cmake/*", "src/*", "CMakeLists.txt"]
+    exports_sources = ["cli/*", "cmake/*", "src/*", "CMakeLists.txt", "test/*", "static_analysis/*"]
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -54,7 +59,8 @@ class OpenDocumentCoreConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["CMAKE_PROJECT_VERSION"] = self.version
-        tc.variables["ODR_TEST"] = False
+        tc.variables["ODR_TEST"] = bool(self.options.ODR_TEST)
+        tc.variables["ODR_CLANG_TIDY"] = bool(self.options.ODR_CLANG_TIDY)
         tc.generate()
 
         deps = CMakeDeps(self)

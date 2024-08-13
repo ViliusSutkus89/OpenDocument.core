@@ -193,16 +193,16 @@ jobs:
       - name: fix artifact permissions
         run: chmod +x package/bin/*
 
-      - name: set ODR_TEST_DATA_DIRECTORY
-        run: echo ODR_TEST_DATA_DIRECTORY=$(readlink --canonicalize test/data) >> $GITHUB_ENV
-      - run: ls $ODR_TEST_DATA_DIRECTORY
-
       - name: test
         if: runner.os != 'Windows'
         run: package/bin/odr_test
+        env:
+          ODR_TEST_DATA_DIRECTORY: $GITHUB_WORKSPACE/test/data
       - name: test
         if: runner.os == 'Windows'
         run: package/bin/odr_test.exe
+        env:
+          ODR_TEST_DATA_DIRECTORY: $GITHUB_WORKSPACE/test/data
 
       - name: tidy public test outputs
         run: python3 -u test/scripts/tidy_output.py output/odr-public/output

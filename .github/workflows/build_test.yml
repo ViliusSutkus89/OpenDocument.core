@@ -65,9 +65,6 @@ jobs:
       - name: conan create
         run: conan create . --version=0.0.0 --options "&:ODR_TEST=True" --test-folder test/downstream --format=json > created.json
 
-      - run: python scripts/get_odrcore_package_folder.py created.json
-        id: package_folder-${{ matrix.compiler }}
-
       - name: Artifact package
         uses: actions/upload-artifact@v4
         with:

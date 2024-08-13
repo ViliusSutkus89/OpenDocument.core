@@ -50,7 +50,7 @@ jobs:
       - name: conan config
         run: conan config install .github/config/${{ matrix.os }}-${{ matrix.compiler }}/conan
       - name: conan install
-        run: conan install . --version=0.0.0 --options "&:ODR_TEST=True" --build=never --output-folder=build
+        run: conan install . --options "&:ODR_TEST=True" --build=never --output-folder=build
 
       - name: cache
         uses: actions/cache@v4
@@ -63,7 +63,7 @@ jobs:
             ${{ matrix.os }}-${{ matrix.compiler }}-
 
       - name: conan create
-        run: conan create . --version=0.0.0 --options "&:ODR_TEST=True" --test-folder test/downstream --format=json > created.json
+        run: conan create . --options "&:ODR_TEST=True" --test-folder test/downstream --format=json > created.json
 
       - run: python scripts/get_odrcore_package_folder.py created.json
         id: package_folder

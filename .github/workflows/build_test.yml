@@ -23,6 +23,8 @@ jobs:
           - { os: macos-13, compiler: clang-14 }
           - { os: macos-14, compiler: armv8-clang-14 }
           - { os: windows-2022, compiler: msvc-1940 }
+    outputs:
+      package_folder: ${{ steps.package_folder.outputs.package_folder }}
     steps:
       - name: checkout
         uses: actions/checkout@v4
@@ -74,6 +76,13 @@ jobs:
           name: package-${{ matrix.os }}-${{ matrix.compiler }}
           path: ${{ steps.package_folder.outputs.package_folder }}
 
+      - name: Artifact dotconan2
+        uses: actions/upload-artifact@v4
+        with:
+          name: dotconan2-${{ matrix.os }}-${{ matrix.compiler }}
+          path: ~/.conan2
+          if-no-files-found: error
+
   docker:
     needs: build
     runs-on: ${{ matrix.os }}
@@ -113,16 +122,18 @@ jobs:
             type=raw,value=latest,enable={{is_default_branch}}
             type=sha
 
-      - name: download binaries
-        uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v4
         with:
-          name: package-${{ matrix.os }}-${{ matrix.compiler }}
-          path: package
+          name: dotconan2-${{ matrix.os }}-${{ matrix.compiler }}
+          path: ~/.conan2
+
+      - name: fix artifact permissions
+        run: chmod +x ${{ needs.build.outputs.package_folder}/bin/*
 
       - name: Build and push
         uses: docker/build-push-action@v5
         with:
-          context: package/bin
+          context: cli
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
@@ -164,16 +175,21 @@ jobs:
       - name: install python dependencies
         run: pip install -r test/scripts/requirements.txt
 
-      - name: download binaries
-        uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v4
         with:
-          name: package-${{ matrix.os }}-${{ matrix.compiler }}
-          path: package
+          name: dotconan2-${{ matrix.os }}-${{ matrix.compiler }}
+          path: ~/.conan2
+
+      - run: ls -lh ${{ needs.build.outputs.package_folder}/bin/
       - name: fix artifact permissions
-        run:  chmod +x package/bin/*
+        run: chmod +x ${{ needs.build.outputs.package_folder}/bin/*
 
       - name: test
+        if: runner.os != 'Windows'
         run: ./package/bin/odr_test
+      - name: test
+        if: runner.os == 'Windows'
+        run: ./package/bin/odr_test.exe
 
       - name: tidy public test outputs
         run: python3 -u test/scripts/tidy_output.py output/odr-public/output

@@ -132,6 +132,10 @@ jobs:
       - name: fix artifact permissions
         run: chmod +x package/bin/*
 
+      - run: |
+          mkdir cli/install
+          cp -r package/bin cli/install
+
       - name: Build and push
         uses: docker/build-push-action@v5
         with:

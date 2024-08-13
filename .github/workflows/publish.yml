@@ -6,6 +6,10 @@ on:
 
 jobs:
   build:
+    # Disabled, because publishing binaries on release would create a new package revision in artifactory,
+    # but artifactory would not have binaries for other supported configs, so downstream users with --build=never would error out
+    # Ideally this script should create a commit in conan-odr-index repo and append new version to the conandata.yml and config.yml
+    if: false
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false

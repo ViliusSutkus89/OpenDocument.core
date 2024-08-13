@@ -128,7 +128,7 @@ jobs:
           path: ~/.conan2
 
       - name: fix artifact permissions
-        run: chmod +x ${{ needs.build.outputs.package_folder}/bin/*
+        run: chmod +x ${{ needs.build.outputs.package_folder }}/bin/*
 
       - name: Build and push
         uses: docker/build-push-action@v5
@@ -182,7 +182,7 @@ jobs:
 
       - run: ls -lh ${{ needs.build.outputs.package_folder}/bin/
       - name: fix artifact permissions
-        run: chmod +x ${{ needs.build.outputs.package_folder}/bin/*
+        run: chmod +x ${{ needs.build.outputs.package_folder }}/bin/*
 
       - name: test
         if: runner.os != 'Windows'

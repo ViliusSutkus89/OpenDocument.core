@@ -24,11 +24,11 @@ jobs:
           - { os: macos-14, compiler: armv8-clang-14 }
           - { os: windows-2022, compiler: msvc-1940 }
     outputs:
-      package_folder-clang-18: ${{ steps.package_folder-ubuntu-24.04-clang-18.outputs.package_folder }}
-      package_folder-gcc-14: ${{ steps.package_folder-ubuntu-24.04-gcc-14.outputs.package_folder }}
-      package_folder-clang-14: ${{ steps.package_folder-macos-13-clang-14.outputs.package_folder }}
-      package_folder-armv8-clang-14: ${{ steps.package_folder-macos-14-armv8-clang-14.outputs.package_folder }}
-      package_folder-msvc-1940: ${{ steps.package_folder-windows-2022-msvc-1940.outputs.package_folder }}
+      package_folder-clang-18: ${{ steps.package_folder-clang-18.outputs.package_folder }}
+      package_folder-gcc-14: ${{ steps.package_folder-gcc-14.outputs.package_folder }}
+      package_folder-clang-14: ${{ steps.package_folder-clang-14.outputs.package_folder }}
+      package_folder-armv8-clang-14: ${{ steps.package_folder-armv8-clang-14.outputs.package_folder }}
+      package_folder-msvc-1940: ${{ steps.package_folder-msvc-1940.outputs.package_folder }}
     steps:
       - name: checkout
         uses: actions/checkout@v4
@@ -72,7 +72,7 @@ jobs:
         run: conan create . --version=0.0.0 --options "&:ODR_TEST=True" --test-folder test/downstream --format=json > created.json
 
       - run: python scripts/get_odrcore_package_folder.py created.json
-        id: package_folder-${{ matrix.os }}-${{ matrix.compiler }}
+        id: package_folder-${{ matrix.compiler }}
 
       - name: Artifact package
         uses: actions/upload-artifact@v4

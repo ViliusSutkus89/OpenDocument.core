@@ -24,7 +24,11 @@ jobs:
           - { os: macos-14, compiler: armv8-clang-14 }
           - { os: windows-2022, compiler: msvc-1940 }
     outputs:
-      package_folder: ${{ steps.package_folder.outputs.package_folder }}
+      package_folder-ubuntu-24.04-clang-18: ${{ steps.package_folder-ubuntu-24.04-clang-18.outputs.package_folder }}
+      package_folder-ubuntu-24.04-gcc-14: ${{ steps.package_folder-ubuntu-24.04-gcc-14.outputs.package_folder }}
+      package_folder-macos-13-clang-14: ${{ steps.package_folder-macos-13-clang-14.outputs.package_folder }}
+      package_folder-macos-14-armv8-clang-14: ${{ steps.package_folder-macos-14-armv8-clang-14.outputs.package_folder }}
+      package_folder-windows-2022-msvc-1940: ${{ steps.package_folder-windows-2022-msvc-1940.outputs.package_folder }}
     steps:
       - name: checkout
         uses: actions/checkout@v4
@@ -68,7 +72,7 @@ jobs:
         run: conan create . --version=0.0.0 --options "&:ODR_TEST=True" --test-folder test/downstream --format=json > created.json
 
       - run: python scripts/get_odrcore_package_folder.py created.json
-        id: package_folder
+        id: package_folder-${{ matrix.os }}-${{ matrix.compiler }}
 
       - name: Artifact package
         uses: actions/upload-artifact@v4
@@ -127,8 +131,8 @@ jobs:
           name: dotconan2-${{ matrix.os }}-${{ matrix.compiler }}
           path: ~/.conan2
 
-      - name: fix artifact permissions
-        run: chmod +x ${{ needs.build.outputs.package_folder }}/bin/*
+#      - name: fix artifact permissions
+#        run: chmod +x ${{ needs.build.outputs.package_folder }}/bin/*
 
       - name: Build and push
         uses: docker/build-push-action@v5
@@ -180,17 +184,17 @@ jobs:
           name: dotconan2-${{ matrix.os }}-${{ matrix.compiler }}
           path: ~/.conan2
 
-      - run: ls -lh ${{ needs.build.outputs.package_folder }}/bin/
-      - name: fix artifact permissions
-        run: chmod +x ${{ needs.build.outputs.package_folder }}/bin/*
-      - run: ls -lh ${{ needs.build.outputs.package_folder }}/bin/
+      - run: ls -lhR ~/.conan2/p
+#      - run: ls -lh ${{ needs.build.outputs.package_folder }}/bin/
+#      - name: fix artifact permissions
+#        run: chmod +x ${{ needs.build.outputs.package_folder }}/bin/*
+#      - run: ls -lh ${{ needs.build.outputs.package_folder }}/bin/
 
       - name: test
-        if: runner.os != 'Windows'
-        run: ./package/bin/odr_test
+        run: ${{ needs.build.outputs['package_folder-' + matrix.os + '-' + matrix.compiler ] }}/bin/odr_test
       - name: test
         if: runner.os == 'Windows'
-        run: ./package/bin/odr_test.exe
+        run: ${{ needs.build.outputs.package_folder-windows-2022-msvc-1940 }}/bin/odr_test.exe
 
       - name: tidy public test outputs
         run: python3 -u test/scripts/tidy_output.py output/odr-public/output

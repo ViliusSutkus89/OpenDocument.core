@@ -33,7 +33,7 @@ jobs:
         run: conan config install .github/config/${{ matrix.os }}-${{ matrix.compiler }}/conan
 
       - name: conan install
-        run: conan install . --options "&:ODR_CLANG_TIDY=True" --build=never --output-folder=build
+        run: conan install . --options "&:ODR_CLANG_TIDY=True" --output-folder=build --build=never
 
       - name: cache
         uses: actions/cache@v4

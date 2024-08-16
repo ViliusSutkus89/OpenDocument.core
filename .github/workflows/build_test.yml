@@ -194,7 +194,13 @@ jobs:
         run: chmod +x package/bin/*
 
       - name: test
-        run: package/bin/odr_test*
+        if: runner.os != 'Windows'
+        run: package/bin/odr_test
+        env:
+          ODR_TEST_DATA_DIRECTORY: ${{ github.workspace }}/test/data
+      - name: test
+        if: runner.os == 'Windows'
+        run: package/bin/odr_test.exe
         env:
           ODR_TEST_DATA_DIRECTORY: ${{ github.workspace }}/test/data
 
